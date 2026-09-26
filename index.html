@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Aion 2 - Advanced Energy Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary-blue: #00d2ff;
+    --primary-red: #ff3d00;
+    --accent-gold: rgb(244, 190, 80);
+    --main-width: 720px; 
+    --bg-red-vip: rgb(203, 37, 23); 
+    --en2-blue: #4fc3f7;
+    --slot-w: 22px; 
+    --bg-dark: rgb(15, 17, 19);
+  }
+
+  ::-webkit-scrollbar { display: none; }
+  html, body { -ms-overflow-style: none; scrollbar-width: none; background: var(--bg-dark); }
+
+  * { 
+    font-family: 'Kanit', sans-serif !important; 
+    box-sizing: border-box; 
+    border: none !important; 
+    outline: none !important;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; text-align: center; }
+
+  body { background: var(--bg-dark); color: #e0e0e0; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+
+  .header-wrapper { 
+    padding: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    flex-shrink: 0; 
+    position: sticky; 
+    top: 0; 
+    background: var(--bg-dark); 
+    z-index: 100;
+  }
+
+  .summary-layout { width: var(--main-width); padding: 12px 25px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; margin-bottom: 10px; }
+  .summary-layout span { font-size: 15px; font-weight: 600; } 
+  
+  .progress-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.25); border-radius: 10px; overflow: hidden; margin-top: 5px; }
+  .progress-fill { height: 100%; transition: width 0.5s ease; }
+
+  .global-task-card { width: var(--main-width); padding: 10px 20px; display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 5px; gap: 25px; }
+  
+  .task-group { display: flex; align-items: center; gap: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 25px; }
+  .task-group:last-child { border-right: none; }
+  
+  .group-title { color: var(--accent-gold); font-size: 12px; font-weight: 700; letter-spacing: 1px; writing-mode: vertical-lr; transform: rotate(180deg); margin-right: -5px; }
+  .task-item { display: flex; flex-direction: column; align-items: center; }
+  .task-item span { font-size: 10px; font-weight: 600; margin-bottom: 2px; }
+
+  .timer-container { margin-left: auto; display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.25); padding: 4px 6px 4px 4px; border-radius: 25px; }
+  .timer-container.active { background: var(--bg-red-vip); }
+  
+  .vip-badge { background: var(--accent-gold); color: #000; padding: 1px 15px; border-radius: 15px; font-weight: 600; font-size: 16px; margin-right: 4px; }
+  .add-time-btn { width: 28px; height: 28px; background: var(--accent-gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; font-weight: 700; margin-left: 4px; transition: 0.1s; }
+  .num-input-readonly { background: transparent; color: white; width: 32px; text-align: center; font-size: 14px; font-weight: 600; pointer-events: none; }
+
+  #main-scroll-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; overflow-y: auto; padding-top: 15px; padding-bottom: 50px; }
+
+  .row-container { width: var(--main-width); padding: 15px; position: relative; border-radius: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; }
+  .bg-Warrior { background-color: rgba(227, 75, 77, 0.8); }
+  .bg-Templar { background-color: rgba(32, 110, 158, 0.8); }
+  .bg-Assassin { background-color: rgba(233, 98, 60, 0.8); }
+  .bg-Ranger { background-color: rgba(122, 166, 81, 0.8); } 
+  .bg-Sorcerer { background-color: rgba(102, 83, 147, 0.8); }
+  .bg-Spiritmaster { background-color: rgba(154, 53, 97, 0.8); }
+  .bg-Cleric { background-color: rgba(244, 190, 80, 0.8); }
+  .bg-Chanter { background-color: rgba(124, 163, 184, 0.8); }
+
+  .class-side { width: 100px; display: flex; flex-direction: column; align-items: center; }
+  .class-icon { width: 55px; height: 55px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+
+  .panel-box { border-radius: 8px; padding: 8px 10px; background: rgba(0, 0, 0, 0.1); position: relative; width: fit-content; }
+  .panel-label { position: absolute; top: -10px; left: 10px; background: rgba(26,26,26, 0.8); padding: 0 6px; font-size: 11px; font-weight: 600; border-radius: 4px; }
+  
+  .grid-display { display: flex; }
+  .item { width: var(--slot-w); display: flex; flex-direction: column; align-items: center; }
+  .item span { font-size: 10px; font-weight: 500; color: #fff; margin-bottom: 4px; height: 12px; }
+
+  .sub-row { display: flex; align-items: center; margin-top: 15px; }
+  .st-offset { margin-left: 20px; }
+
+  .energy-panel { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 150px; }
+  .energy-title { font-size: 11px; font-weight: 600; color: gold; letter-spacing: 0.5px; }
+  .num-input { background: rgba(0,0,0,0.25); color: white; width: 45px; border-radius: 5px; padding: 3px; font-size: 13px; font-weight: 400; text-align: center; }
+  
+  .status-text { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 5px; }
+  .total-badge { background: var(--accent-gold); color: #000; padding: 1px 8px; border-radius: 5px; font-weight: 600; font-size: 14px; }
+
+  input[type="checkbox"].tracker-chk { appearance: none; width: 18px; height: 18px; border-radius: 4px; cursor: pointer; background: rgba(255,255,255,0.3); margin: 0; }
+  input[type="checkbox"]:checked { background: #1a1a1a; position: relative; }
+  input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 12px; font-weight: 600; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+  .delete-btn { position: absolute; right: 8px; top: 8px; color: #fff; opacity: 0.3; cursor: pointer; font-size: 14px; }
+  
+  .footer-controls { width: var(--main-width); display: flex; gap: 10px; padding: 20px 0; flex-shrink: 0; margin: 0 auto; }
+  .btn { padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+  .btn-add { background: #2e7d32; color: white; margin-right: auto; }
+  .btn-re { background: var(--accent-gold); color: #000; min-width: 50px; }
+  .btn-reset { background: #c62828; color: white; }
+</style>
+</head>
+<body>
+
+<div class="header-wrapper">
+  <div class="summary-layout">
+    <div style="margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between;">
+        <span>CONQUEST <small id="con-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/77)</small></span>
+        <span id="con-pct" style="color:var(--primary-blue)">0%</span>
+      </div>
+      <div class="progress-bg"><div id="con-bar" class="progress-fill" style="background:var(--primary-blue); width:0%"></div></div>
+    </div>
+    <div>
+      <div style="display:flex; justify-content:space-between;">
+        <span>TRANSCENDENCE <small id="tra-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/49)</small></span>
+        <span id="tra-pct" style="color:var(--primary-red)">0%</span>
+      </div>
+      <div class="progress-bg"><div id="tra-bar" class="progress-fill" style="background:var(--primary-red); width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="global-task-card">
+    <div class="task-group">
+      <div class="group-title">ODYLE</div>
+      <div class="task-item"><span>BUY</span><input type="checkbox" id="gb-buy" class="tracker-chk daily-reset"></div>
+      <div class="task-item"><span>CRAFT</span><input type="checkbox" id="gb-craft" class="tracker-chk daily-reset"></div>
+    </div>
+
+    <div class="task-group">
+      <div class="group-title">WEEKLY</div>
+      <div class="task-item"><span>DAILY</span><input type="checkbox" id="gb-daily" class="tracker-chk daily-reset"></div>
+      <div class="task-item"><span>DUTY</span><input type="checkbox" id="gb-duty" class="tracker-chk daily-reset"></div>
+    </div>
+    
+    <div id="v-box" class="timer-container">
+      <div class="vip-badge">VIP</div>
+      <input type="text" id="v-d" class="num-input-readonly" value="0" readonly> <small style="font-size:10px">D</small>
+      <input type="text" id="v-h" class="num-input-readonly" value="0" readonly><span>:</span>
+      <input type="text" id="v-m" class="num-input-readonly" value="0" readonly>
+      <span id="v-s" style="width:20px; font-size:13px; margin-left:2px; font-weight:600;">00</span>
+      <div class="add-time-btn" onclick="promptSetTime()">+</div>
+    </div>
+  </div>
+</div>
+
+<div id="main-scroll-area">
+  <div id="container"></div>
+  <div class="footer-controls">
+    <button class="btn btn-add" onclick="addRow()">+ ADD CHARACTER</button>
+    <button class="btn btn-re" onclick="manualRecharge()">⚡</button>
+    <button class="btn btn-reset" onclick="resetDaily()">RESET</button>
+  </div>
+</div>
+
+<script>
+  const classes = [ {n:'Warrior', i:'⚔️'}, {n:'Templar', i:'🛡️'}, {n:'Assassin', i:'🗡️'}, {n:'Ranger', i:'🏹'}, {n:'Sorcerer', i:'🔮'}, {n:'Spiritmaster', i:'🔥'}, {n:'Cleric', i:'✨'}, {n:'Chanter', i:'⚕️'} ];
+  let vEnd = null;
+  let lastRechargeTime = null; 
+  const STORAGE_KEY = 'aion2_tracker_v4_logic';
+  const RECHARGE_HOURS = [1, 4, 7, 10, 13, 16, 19, 22];
+
+  function checkAndAutoRecharge() {
+    if (!lastRechargeTime) { lastRechargeTime = Date.now(); save(); return; }
+    const now = new Date();
+    const last = new Date(lastRechargeTime);
+    let rechargeCount = 0;
+    let checkTime = new Date(last);
+    checkTime.setMinutes(0, 0, 0);
+    while (checkTime < now) {
+      checkTime.setHours(checkTime.getHours() + 1);
+      if (checkTime > now) break;
+      if (RECHARGE_HOURS.includes(checkTime.getHours())) rechargeCount++;
+    }
+    if (rechargeCount > 0) {
+      executeRecharge(rechargeCount);
+      lastRechargeTime = now.getTime();
+      save();
+    }
+  }
+
+  function executeRecharge(cycles = 1) {
+    const isVIP = (vEnd && vEnd > Date.now());
+    const amountPerCycle = isVIP ? 15 : 10;
+    const maxLimit = isVIP ? 840 : 560;
+    const totalAdd = cycles * amountPerCycle;
+    document.querySelectorAll('.row-container').forEach(row => {
+      const e1Input = document.getElementById(`e1-${row.id}`);
+      let currentVal = Number(e1Input.value) || 0;
+      let newVal = currentVal + totalAdd;
+      if (newVal > maxLimit) newVal = maxLimit;
+      e1Input.value = newVal;
+      calcEnergy(row.id);
+    });
+  }
+
+  function manualRecharge() { executeRecharge(1); save(); }
+
+  function updateVIP() {
+    const box = document.getElementById('v-box');
+    if (!vEnd) { 
+      box.classList.remove('active');
+      document.getElementById('v-d').value = 0; document.getElementById('v-h').value = 0;
+      document.getElementById('v-m').value = 0; document.getElementById('v-s').innerText = "00";
+      return; 
+    }
+    const diff = vEnd - Date.now();
+    if (diff <= 0) { vEnd = null; box.classList.remove('active'); return; }
+    box.classList.add('active');
+    const d = Math.floor(diff/864e5), h = Math.floor((diff%864e5)/36e5), m = Math.floor((diff%36e5)/6e4), s = Math.floor((diff%6e4)/1000);
+    document.getElementById('v-d').value = d; document.getElementById('v-h').value = h; document.getElementById('v-m').value = m;
+    document.getElementById('v-s').innerText = String(s).padStart(2,'0');
+  }
+
+  function promptSetTime() {
+    const input = prompt("ตั้งเวลา VIP (วัน,ชั่วโมง)", "28,0");
+    if (!input) return;
+    const [d, h] = input.split(",").map(v => parseInt(v) || 0);
+    vEnd = (d === 0 && h === 0) ? null : Date.now() + ((d * 86400) + (h * 3600)) * 1000;
+    save(); updateVIP();
+  }
+
+  function addRow(saved = null) {
+    const id = saved?.id || 'r' + Date.now();
+    const cls = saved?.class || 'Warrior';
+    const row = document.createElement('div');
+    row.className = `row-container bg-${cls}`;
+    row.id = id;
+    row.innerHTML = `
+      <span class="delete-btn" onclick="delRow('${id}')">✕</span>
+      <div class="class-side">
+        <div class="class-icon" id="icon-${id}" data-class="${cls}" onclick="cycleClass('${id}')">${classes.find(c=>c.n===cls).i}</div>
+        <input type="number" id="gs-${id}" class="num-input" style="width:80%; margin-top:8px;" placeholder="GS" value="${saved?.gs||''}" oninput="save()">
+      </div>
+      <div style="flex-grow:0;">
+        <div class="panel-box"><span class="panel-label" style="color:var(--primary-blue)">CONQUEST</span><div class="grid-display" id="con-${id}"></div></div>
+        <div class="sub-row">
+          <div class="panel-box"><span class="panel-label" style="color:var(--primary-red)">TRANSCENDENCE</span><div class="grid-display" id="tra-${id}"></div></div>
+          <div class="panel-box st-offset"><span class="panel-label" style="color:var(--accent-gold)">SANCTUARY</span><div class="grid-display" id="st-${id}"></div></div>
+        </div>
+      </div>
+      <div class="energy-panel">
+        <span class="energy-title">ENERGY</span>
+        <div style="display:flex; gap:5px; align-items:center;">
+          <input type="number" id="e1-${id}" class="num-input" value="${saved?.e1||0}" oninput="calcEnergy('${id}')">
+          <span style="opacity:0.5;">+</span>
+          <input type="number" id="e2-${id}" class="num-input" style="color:var(--en2-blue)" value="${saved?.e2||0}" oninput="calcEnergy('${id}')">
+        </div>
+        <div class="status-text"><span>เหลือ</span><div id="tot-${id}" class="total-badge">0</div><span>ครั้ง</span></div>
+      </div>`;
+    document.getElementById('container').appendChild(row);
+    renderGrid(`con-${id}`, 21, 'con-chk', saved?.conData);
+    renderGrid(`tra-${id}`, 14, 'tra-chk', saved?.traData);
+    renderGrid(`st-${id}`, 5, 'st-chk', saved?.stData);
+    calcEnergy(id);
+  }
+
+  function renderGrid(containerId, count, cls, savedData) {
+    const el = document.getElementById(containerId);
+    for (let i = 0; i < count; i++) {
+      const div = document.createElement('div'); div.className = 'item';
+      const isChecked = savedData ? savedData[i] : false;
+      div.innerHTML = `<span>${i+1}</span><input type="checkbox" class="tracker-chk ${cls}" ${isChecked?'checked':''} data-was="${isChecked}" onchange="smartCheck('${containerId}', ${i}, this.checked)">`;
+      el.appendChild(div);
+    }
+  }
+
+  function smartCheck(gridId, idx, isChecked) {
+    const rowId = gridId.split('-')[1];
+    const chks = document.getElementById(gridId).querySelectorAll('input[type="checkbox"]');
+    let e1 = document.getElementById(`e1-${rowId}`), e2 = document.getElementById(`e2-${rowId}`);
+    let v1 = Number(e1.value), v2 = Number(e2.value);
+    if (isChecked) {
+      for (let i = 0; i <= idx; i++) {
+        if (chks[i].getAttribute('data-was') === 'false') {
+          if (v1 >= 80) v1 -= 80; else { v2 = Math.max(0, v2 - (80 - v1)); v1 = 0; }
+          chks[i].checked = true; chks[i].setAttribute('data-was', 'true');
+        }
+      }
+    } else {
+      for (let i = idx; i < chks.length; i++) {
+        if (chks[i].getAttribute('data-was') === 'true') {
+          v1 += 80; chks[i].checked = false; chks[i].setAttribute('data-was', 'false');
+        }
+      }
+    }
+    e1.value = v1; e2.value = v2; calcEnergy(rowId); save();
+  }
+
+  function calcEnergy(id) {
+    const v1 = Number(document.getElementById(`e1-${id}`).value)||0;
+    const v2 = Number(document.getElementById(`e2-${id}`).value)||0;
+    document.getElementById(`tot-${id}`).innerText = Math.floor((v1+v2)/80);
+    updateSummary();
+  }
+
+  function updateSummary() {
+    // ล็อกเป้าหมายไว้ที่ 77 และ 49 เสมอ
+    const conMax = 77;
+    const traMax = 49;
+    
+    let cCount = document.querySelectorAll('.con-chk:checked').length;
+    // นับเฉพาะ Transcendence (tra-chk) ไม่รวม Sanctuary (st-chk)
+    let tCount = document.querySelectorAll('.tra-chk:checked').length;
+
+    const update = (id, pctId, txtId, cur, max) => {
+      let p = Math.min((cur/max)*100, 100);
+      document.getElementById(id).style.width = p + '%';
+      document.getElementById(pctId).innerText = Math.round(p) + '%';
+      document.getElementById(txtId).innerText = `(${cur}/${max})`;
+    };
+    update('con-bar', 'con-pct', 'con-txt', cCount, conMax);
+    update('tra-bar', 'tra-pct', 'tra-txt', tCount, traMax);
+  }
+
+  function cycleClass(id) {
+    const el = document.getElementById(`icon-${id}`);
+    let nextIdx = (classes.findIndex(c=>c.n===el.getAttribute('data-class')) + 1) % classes.length;
+    let next = classes[nextIdx];
+    el.innerText = next.i; el.setAttribute('data-class', next.n);
+    document.getElementById(id).className = `row-container bg-${next.n}`;
+    save();
+  }
+
+  function save() {
+    const data = {
+      vEnd, lastRechargeTime,
+      tasks: { buy: document.getElementById('gb-buy').checked, craft: document.getElementById('gb-craft').checked, daily: document.getElementById('gb-daily').checked, duty: document.getElementById('gb-duty').checked },
+      chars: Array.from(document.querySelectorAll('.row-container')).map(r => ({
+        id: r.id, class: document.getElementById(`icon-${r.id}`).getAttribute('data-class'), gs: document.getElementById(`gs-${r.id}`).value, e1: document.getElementById(`e1-${r.id}`).value, e2: document.getElementById(`e2-${r.id}`).value,
+        conData: Array.from(r.querySelectorAll('.con-chk')).map(c=>c.checked),
+        traData: Array.from(r.querySelectorAll('.tra-chk')).map(c=>c.checked),
+        stData: Array.from(r.querySelectorAll('.st-chk')).map(c=>c.checked)
+      }))
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function load() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { addRow(); return; }
+    const d = JSON.parse(raw);
+    vEnd = d.vEnd;
+    lastRechargeTime = d.lastRechargeTime || Date.now();
+    document.getElementById('gb-buy').checked = d.tasks.buy; document.getElementById('gb-craft').checked = d.tasks.craft;
+    document.getElementById('gb-daily').checked = d.tasks.daily; document.getElementById('gb-duty').checked = d.tasks.duty;
+    d.chars.forEach(c => addRow(c));
+    checkAndAutoRecharge();
+  }
+
+  function delRow(id) { if(confirm("ลบตัวละครนี้?")) { document.getElementById(id).remove(); save(); updateSummary(); } }
+  function resetDaily() { 
+    document.querySelectorAll('.tracker-chk').forEach(c => { c.checked = false; c.setAttribute('data-was', 'false'); });
+    save(); updateSummary(); 
+  }
+
+  window.onload = load;
+  setInterval(updateVIP, 1000);
+  setInterval(checkAndAutoRecharge, 60000);
+</script>
+</body>
+</html>
