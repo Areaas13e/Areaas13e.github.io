@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aion 2 - Advanced Energy Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --primary-blue: #00d2ff;
     --primary-red: #ff3d00;
     --accent-gold: rgb(244, 190, 80);
-    --main-width: 720px; 
+    --main-width: 850px; 
     --bg-red-vip: rgb(203, 37, 23); 
     --en2-blue: #4fc3f7;
     --slot-w: 22px; 
@@ -51,19 +53,23 @@
   .progress-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.25); border-radius: 10px; overflow: hidden; margin-top: 5px; }
   .progress-fill { height: 100%; transition: width 0.5s ease; }
 
-  .global-task-card { width: var(--main-width); padding: 10px 20px; display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 5px; gap: 25px; }
+  .global-task-card { width: var(--main-width); padding: 10px 15px; display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin-bottom: 5px; gap: 15px; }
   
-  .task-group { display: flex; align-items: center; gap: 15px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 25px; }
+  .task-group { display: flex; align-items: center; gap: 12px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; }
   .task-group:last-child { border-right: none; }
   
   .group-title { color: var(--accent-gold); font-size: 12px; font-weight: 700; letter-spacing: 1px; writing-mode: vertical-lr; transform: rotate(180deg); margin-right: -5px; }
   .task-item { display: flex; flex-direction: column; align-items: center; }
   .task-item span { font-size: 10px; font-weight: 600; margin-bottom: 2px; }
 
-  .timer-container { margin-left: auto; display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.25); padding: 4px 6px 4px 4px; border-radius: 25px; }
+  .timers-wrapper { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .timer-container { display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.25); padding: 4px 6px 4px 4px; border-radius: 25px; }
   .timer-container.active { background: var(--bg-red-vip); }
   
-  .vip-badge { background: var(--accent-gold); color: #000; padding: 1px 15px; border-radius: 15px; font-weight: 600; font-size: 16px; margin-right: 4px; }
+  .vip-badge { background: var(--accent-gold); color: #000; padding: 1px 15px; border-radius: 15px; font-weight: 600; font-size: 14px; margin-right: 4px; }
+  .siege-badge { background: #b388ff; color: #000; padding: 1px 12px; border-radius: 15px; font-weight: 600; font-size: 14px; margin-right: 4px; }
+  
   .add-time-btn { width: 28px; height: 28px; background: var(--accent-gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; font-weight: 700; margin-left: 4px; transition: 0.1s; }
   .num-input-readonly { background: transparent; color: white; width: 32px; text-align: center; font-size: 14px; font-weight: 600; pointer-events: none; }
 
@@ -92,7 +98,12 @@
   .sub-row { display: flex; align-items: center; margin-top: 15px; }
   .st-offset { margin-left: 20px; }
 
-  .energy-panel { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 150px; }
+  .tasks-panel-box { display: flex; flex-direction: column; justify-content: center; height: 60px; padding: 6px 12px; margin-left: 5px; }
+  .char-tasks-panel { display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; min-width: 70px; }
+  .char-task-box { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 8px; }
+  .char-task-box span { font-size: 10px; font-weight: 600; color: #e0e0e0; }
+
+  .energy-panel { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 130px; transform: translateY(-6px); }
   .energy-title { font-size: 11px; font-weight: 600; color: gold; letter-spacing: 0.5px; }
   .num-input { background: rgba(0,0,0,0.25); color: white; width: 45px; border-radius: 5px; padding: 3px; font-size: 13px; font-weight: 400; text-align: center; }
   
@@ -118,14 +129,14 @@
   <div class="summary-layout">
     <div style="margin-bottom:10px;">
       <div style="display:flex; justify-content:space-between;">
-        <span>CONQUEST <small id="con-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/77)</small></span>
+        <span>CONQUEST <small id="con-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/83)</small></span>
         <span id="con-pct" style="color:var(--primary-blue)">0%</span>
       </div>
       <div class="progress-bg"><div id="con-bar" class="progress-fill" style="background:var(--primary-blue); width:0%"></div></div>
     </div>
     <div>
       <div style="display:flex; justify-content:space-between;">
-        <span>TRANSCENDENCE <small id="tra-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/49)</small></span>
+        <span>TRANSCENDENCE <small id="tra-txt" style="font-size:11px; opacity:0.7; font-weight:300;">(0/55)</small></span>
         <span id="tra-pct" style="color:var(--primary-red)">0%</span>
       </div>
       <div class="progress-bg"><div id="tra-bar" class="progress-fill" style="background:var(--primary-red); width:0%"></div></div>
@@ -133,25 +144,35 @@
   </div>
 
   <div class="global-task-card">
+    <!-- Abyss Siege Countdown Loop Timer (ย้ายมาไว้ซ้ายสุดของการ์ด) -->
+    <div id="siege-box" class="timer-container" style="margin-right: 5px;">
+      <div class="siege-badge">ABYSS SIEGE</div>
+      <input type="text" id="sg-d" class="num-input-readonly" value="0" readonly> <small style="font-size:10px">D</small>
+      <input type="text" id="sg-h" class="num-input-readonly" value="0" readonly><span>:</span>
+      <input type="text" id="sg-m" class="num-input-readonly" value="0" readonly>
+    </div>
+
     <div class="task-group">
       <div class="group-title">ODYLE</div>
-      <div class="task-item"><span>BUY</span><input type="checkbox" id="gb-buy" class="tracker-chk daily-reset"></div>
-      <div class="task-item"><span>CRAFT</span><input type="checkbox" id="gb-craft" class="tracker-chk daily-reset"></div>
+      <div class="task-item"><span>BUY</span><input type="checkbox" id="gb-buy" class="tracker-chk daily-reset" onchange="save()"></div>
+      <div class="task-item"><span>CRAFT</span><input type="checkbox" id="gb-craft" class="tracker-chk daily-reset" onchange="save()"></div>
     </div>
 
     <div class="task-group">
       <div class="group-title">WEEKLY</div>
-      <div class="task-item"><span>DAILY</span><input type="checkbox" id="gb-daily" class="tracker-chk daily-reset"></div>
-      <div class="task-item"><span>DUTY</span><input type="checkbox" id="gb-duty" class="tracker-chk daily-reset"></div>
+      <div class="task-item"><span>DAILY</span><input type="checkbox" id="gb-daily" class="tracker-chk daily-reset" onchange="save()"></div>
+      <div class="task-item"><span>DUTY</span><input type="checkbox" id="gb-duty" class="tracker-chk daily-reset" onchange="save()"></div>
     </div>
     
-    <div id="v-box" class="timer-container">
-      <div class="vip-badge">VIP</div>
-      <input type="text" id="v-d" class="num-input-readonly" value="0" readonly> <small style="font-size:10px">D</small>
-      <input type="text" id="v-h" class="num-input-readonly" value="0" readonly><span>:</span>
-      <input type="text" id="v-m" class="num-input-readonly" value="0" readonly>
-      <span id="v-s" style="width:20px; font-size:13px; margin-left:2px; font-weight:600;">00</span>
-      <div class="add-time-btn" onclick="promptSetTime()">+</div>
+    <div class="timers-wrapper">
+      <!-- VIP Timer -->
+      <div id="v-box" class="timer-container">
+        <div class="vip-badge">VIP</div>
+        <input type="text" id="v-d" class="num-input-readonly" value="0" readonly> <small style="font-size:10px">D</small>
+        <input type="text" id="v-h" class="num-input-readonly" value="0" readonly><span>:</span>
+        <input type="text" id="v-m" class="num-input-readonly" value="0" readonly>
+        <div class="add-time-btn" onclick="promptSetTime()">+</div>
+      </div>
     </div>
   </div>
 </div>
@@ -169,8 +190,9 @@
   const classes = [ {n:'Warrior', i:'⚔️'}, {n:'Templar', i:'🛡️'}, {n:'Assassin', i:'🗡️'}, {n:'Ranger', i:'🏹'}, {n:'Sorcerer', i:'🔮'}, {n:'Spiritmaster', i:'🔥'}, {n:'Cleric', i:'✨'}, {n:'Chanter', i:'⚕️'} ];
   let vEnd = null;
   let lastRechargeTime = null; 
+  let nextSiegeTargetTime = null;
   const STORAGE_KEY = 'aion2_tracker_v4_logic';
-  const RECHARGE_HOURS = [1, 4, 7, 10, 13, 16, 19, 22];
+  const RECHARGE_HOURS = [2, 5, 8, 11, 14, 17, 20, 23];
 
   function checkAndAutoRecharge() {
     if (!lastRechargeTime) { lastRechargeTime = Date.now(); save(); return; }
@@ -213,15 +235,60 @@
     if (!vEnd) { 
       box.classList.remove('active');
       document.getElementById('v-d').value = 0; document.getElementById('v-h').value = 0;
-      document.getElementById('v-m').value = 0; document.getElementById('v-s').innerText = "00";
+      document.getElementById('v-m').value = 0;
       return; 
     }
     const diff = vEnd - Date.now();
     if (diff <= 0) { vEnd = null; box.classList.remove('active'); return; }
     box.classList.add('active');
-    const d = Math.floor(diff/864e5), h = Math.floor((diff%864e5)/36e5), m = Math.floor((diff%36e5)/6e4), s = Math.floor((diff%6e4)/1000);
+    const d = Math.floor(diff/864e5), h = Math.floor((diff%864e5)/36e5), m = Math.floor((diff%36e5)/6e4);
     document.getElementById('v-d').value = d; document.getElementById('v-h').value = h; document.getElementById('v-m').value = m;
-    document.getElementById('v-s').innerText = String(s).padStart(2,'0');
+  }
+
+  function getNextSiegeTime() {
+    const now = new Date();
+    const targetDays = [1, 4, 6]; // 1: Mon, 4: Thu, 6: Sat
+    let nextTarget = null;
+
+    for (let dayOffset = 0; dayOffset <= 7; dayOffset++) {
+      let checkDate = new Date(now);
+      checkDate.setDate(now.getDate() + dayOffset);
+      checkDate.setHours(19, 0, 0, 0);
+
+      if (targetDays.includes(checkDate.getDay()) && checkDate > now) {
+        nextTarget = checkDate;
+        break;
+      }
+    }
+    return nextTarget ? nextTarget.getTime() : null;
+  }
+
+  function updateAbyssSiege() {
+    const now = Date.now();
+
+    if (!nextSiegeTargetTime || now >= nextSiegeTargetTime) {
+      if (nextSiegeTargetTime) {
+        document.querySelectorAll('[id^="aby-"]').forEach(chk => {
+          chk.checked = false;
+        });
+        save();
+      }
+      nextSiegeTargetTime = getNextSiegeTime();
+      save();
+    }
+
+    if (nextSiegeTargetTime) {
+      const diff = nextSiegeTargetTime - now;
+      if (diff > 0) {
+        const d = Math.floor(diff / 864e5);
+        const h = Math.floor((diff % 864e5) / 36e5);
+        const m = Math.floor((diff % 36e5) / 6e4);
+
+        document.getElementById('sg-d').value = d;
+        document.getElementById('sg-h').value = h;
+        document.getElementById('sg-m').value = m;
+      }
+    }
   }
 
   function promptSetTime() {
@@ -251,6 +318,21 @@
           <div class="panel-box st-offset"><span class="panel-label" style="color:var(--accent-gold)">SANCTUARY</span><div class="grid-display" id="st-${id}"></div></div>
         </div>
       </div>
+      
+      <div class="panel-box tasks-panel-box">
+        <span class="panel-label" style="color:#b388ff">TASKS</span>
+        <div class="char-tasks-panel">
+          <div class="char-task-box">
+            <span>ODYLE</span>
+            <input type="checkbox" id="ody-${id}" class="tracker-chk" ${saved?.ody ? 'checked' : ''} onchange="save()">
+          </div>
+          <div class="char-task-box">
+            <span>ABYSS</span>
+            <input type="checkbox" id="aby-${id}" class="tracker-chk" ${saved?.aby ? 'checked' : ''} onchange="save()">
+          </div>
+        </div>
+      </div>
+
       <div class="energy-panel">
         <span class="energy-title">ENERGY</span>
         <div style="display:flex; gap:5px; align-items:center;">
@@ -259,7 +341,7 @@
           <input type="number" id="e2-${id}" class="num-input" style="color:var(--en2-blue)" value="${saved?.e2||0}" oninput="calcEnergy('${id}')">
         </div>
         <div class="status-text"><span>เหลือ</span><div id="tot-${id}" class="total-badge">0</div><span>ครั้ง</span></div>
-      </div>`;
+      `;
     document.getElementById('container').appendChild(row);
     renderGrid(`con-${id}`, 21, 'con-chk', saved?.conData);
     renderGrid(`tra-${id}`, 14, 'tra-chk', saved?.traData);
@@ -304,15 +386,14 @@
     const v2 = Number(document.getElementById(`e2-${id}`).value)||0;
     document.getElementById(`tot-${id}`).innerText = Math.floor((v1+v2)/80);
     updateSummary();
+    save();
   }
 
   function updateSummary() {
-    // ล็อกเป้าหมายไว้ที่ 77 และ 49 เสมอ
-    const conMax = 77;
-    const traMax = 49;
+    const conMax = 83;
+    const traMax = 55;
     
     let cCount = document.querySelectorAll('.con-chk:checked').length;
-    // นับเฉพาะ Transcendence (tra-chk) ไม่รวม Sanctuary (st-chk)
     let tCount = document.querySelectorAll('.tra-chk:checked').length;
 
     const update = (id, pctId, txtId, cur, max) => {
@@ -336,10 +417,16 @@
 
   function save() {
     const data = {
-      vEnd, lastRechargeTime,
+      vEnd, lastRechargeTime, nextSiegeTargetTime,
       tasks: { buy: document.getElementById('gb-buy').checked, craft: document.getElementById('gb-craft').checked, daily: document.getElementById('gb-daily').checked, duty: document.getElementById('gb-duty').checked },
       chars: Array.from(document.querySelectorAll('.row-container')).map(r => ({
-        id: r.id, class: document.getElementById(`icon-${r.id}`).getAttribute('data-class'), gs: document.getElementById(`gs-${r.id}`).value, e1: document.getElementById(`e1-${r.id}`).value, e2: document.getElementById(`e2-${r.id}`).value,
+        id: r.id, 
+        class: document.getElementById(`icon-${r.id}`).getAttribute('data-class'), 
+        gs: document.getElementById(`gs-${r.id}`).value, 
+        e1: document.getElementById(`e1-${r.id}`).value, 
+        e2: document.getElementById(`e2-${r.id}`).value,
+        ody: document.getElementById(`ody-${r.id}`) ? document.getElementById(`ody-${r.id}`).checked : false,
+        aby: document.getElementById(`aby-${r.id}`) ? document.getElementById(`aby-${r.id}`).checked : false,
         conData: Array.from(r.querySelectorAll('.con-chk')).map(c=>c.checked),
         traData: Array.from(r.querySelectorAll('.tra-chk')).map(c=>c.checked),
         stData: Array.from(r.querySelectorAll('.st-chk')).map(c=>c.checked)
@@ -354,6 +441,7 @@
     const d = JSON.parse(raw);
     vEnd = d.vEnd;
     lastRechargeTime = d.lastRechargeTime || Date.now();
+    nextSiegeTargetTime = d.nextSiegeTargetTime || null;
     document.getElementById('gb-buy').checked = d.tasks.buy; document.getElementById('gb-craft').checked = d.tasks.craft;
     document.getElementById('gb-daily').checked = d.tasks.daily; document.getElementById('gb-duty').checked = d.tasks.duty;
     d.chars.forEach(c => addRow(c));
@@ -361,13 +449,22 @@
   }
 
   function delRow(id) { if(confirm("ลบตัวละครนี้?")) { document.getElementById(id).remove(); save(); updateSummary(); } }
+  
   function resetDaily() { 
-    document.querySelectorAll('.tracker-chk').forEach(c => { c.checked = false; c.setAttribute('data-was', 'false'); });
+    document.querySelectorAll('.tracker-chk:not([id^="aby-"])').forEach(c => { 
+      c.checked = false; 
+      c.setAttribute('data-was', 'false'); 
+    });
     save(); updateSummary(); 
   }
 
-  window.onload = load;
+  window.onload = function() {
+    load();
+    updateAbyssSiege();
+  };
+  
   setInterval(updateVIP, 1000);
+  setInterval(updateAbyssSiege, 1000);
   setInterval(checkAndAutoRecharge, 60000);
 </script>
 </body>
